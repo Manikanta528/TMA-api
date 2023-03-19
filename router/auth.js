@@ -1,9 +1,10 @@
 const express = require("express");
 const router = express.Router();
 const User = require("../models/user");
+const bcrypt = require("bcryptjs");
 
 router.post("/register", (req, res) => {
-  //console.log(req.body);
+  console.log(req.body);
   const { name, email, password } = req.body;
   User.create({ name, email, password })
     .then(() => {
@@ -25,10 +26,17 @@ router.post("/login", (req, res) => {
         return res.json({ user: false, err: "user not found" });
       }
       //console.log(user.password !== req.body.password)
-      if (user.password !== req.body.password) {
-        return res.json({ user: false, err: "wrong password" });
-      }
-      return res.json({ login: "success" });
+      bcrypt.compare(req.body.password, user.password, function (err, result) {
+        if (err) {
+          return res.json({ user: false, err: "wrong password" });
+        }
+        if(!result){
+          return res.json({ user: false, err: "wrong password" });
+        }
+        if (result) {
+          return res.json({ login: "success" });
+        }
+      });
     })
     .catch((error) => {
       //console.log(error);
