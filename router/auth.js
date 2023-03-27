@@ -4,15 +4,22 @@ const User = require("../models/user");
 const bcrypt = require("bcryptjs");
 
 router.post("/register", (req, res) => {
-  console.log(req.body);
+  //console.log(req.body);
   const { name, email, password } = req.body;
-  User.create({ name, email, password })
+  User.findOne({ email }).then((user) => {
+    if(user){
+      return res.json({user: false, err: "user already exists"})
+    }else{
+    User.create({ name, email, password })
     .then(() => {
-      return res.json("ok");
+      return res.json("Registered successfully");
     })
     .catch((err) => {
       return res.json(err);
     });
+    }
+  });
+  
 });
 
 router.post("/login", (req, res) => {
